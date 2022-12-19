@@ -1,6 +1,6 @@
 [submodule "externals/eigen"]
 	path = externals/eigen
-	url = https://github.com/libigl/eigen
+	url = https://gitlab.com/libeigen/eigen
 
 [submodule "externals/opencv"]
 	path = externals/opencv
