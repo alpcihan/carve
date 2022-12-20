@@ -94,6 +94,7 @@ target_link_libraries(externals INTERFACE
     eigen
 
     # opencv
+    opencv_aruco
     opencv_core
     opencv_highgui
     opencv_imgproc

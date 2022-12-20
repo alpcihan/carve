@@ -12,6 +12,8 @@ int main(int argc, char **argv)
     // create a pink image
     cv::Mat image(320, 320, CV_8UC3, cv::Scalar(155, 0, 155));
 
+    cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
+
     // check for failure
     if (image.empty())
     {
