@@ -2,6 +2,40 @@
 .vscode
 build
 
+## MacOS
+.DS_Store
+
+## Media
+*.[Mm][Oo][Vv]
+*.[Mm][Pp]4
+*.[Jj][Pp][Gg]
+*.[Jj][Pp][Ee][Gg]
+*.[Pp][Nn][Gg]
+*.[Gg][Ii][Ff]
+*.[Gg][Ii][Ff][Vv]
+*.[Tt][Ii][Ff][Ff]
+*.[Mm][Kk][Vv]
+*.[Mm][Pp][Gg]
+*.[Mm][Pp][Ee][Gg]
+*.[Aa][Vv][Ii]
+*.[Mm]4[Vv]
+*.[Mm]2[Vv]
+*.[Ww][Mm][Vv]
+*.[Ff]4[Vv]
+*.[Qq][Tt]
+*.[Ff][Ll][Vv]
+
+## Custom
+*.cmake
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.exe
+*.pdb
+*.dll
+*.o
+*.a
+
 ## Visual Studio
 # User-specific files
 *.rsuser
