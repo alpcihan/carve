@@ -1,9 +1,11 @@
 add_library(externals INTERFACE)
 
+option(BUILD_TESTS OFF)
 option(BUILD_TESTING OFF)
 option(BUILD_PERF_TESTS OFF)
 option(BUILD_opencv_python_tests OFF)
-set(OPENCV_EXTRA_MODULES_PATH ${CMAKE_CURRENT_SOURCE_DIR}/opencv_contrib/modules)
+set(BUILD_opencv_aruco TRUE CACHE BOOL "BUILD OpenCV ARuco")
+set(OPENCV_EXTRA_MODULES_PATH ${CMAKE_CURRENT_SOURCE_DIR}/opencv_contrib/modules CACHE PATH "Path to OpenCV extra modules")
 
 add_subdirectory(opencv) # add before eigen (due to the custom target uninstall conflict)
 add_subdirectory(eigen)
@@ -94,8 +96,9 @@ target_link_libraries(externals INTERFACE
     eigen
 
     # opencv
-    opencv_aruco
     opencv_core
     opencv_highgui
     opencv_imgproc
+    opencv_calib3d
+    opencv_aruco
 )
