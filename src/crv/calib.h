@@ -9,13 +9,7 @@ namespace crv
     {
         struct CameraToMarkerData
         {
-            struct Data
-            {
-                uint32_t markerId;
-                cv::Matx44d transform;
-            };
-            
-            std::vector<Data> data;
+            cv::Matx44d transform;
             cv::Mat image; 
         };
 

@@ -52,9 +52,11 @@ namespace crv
             std::cout << "\nCalibrating the camera... (This might take some time dependent on the total frames used.)\n\n";
 
             cv::Mat R, T;
-            cv::calibrateCamera(objpoints, imgpoints, cv::Size(gray.rows, gray.cols), cameraMatrix, distCoeffs, R, T);
+            cv::calibrateCamera(objpoints, imgpoints, cv::Size(gray.cols, gray.rows), cameraMatrix, distCoeffs, R, T);
 
-            std::cout << "Camera Matrix:\n" << cameraMatrix << "\nDistortion Coefficients:\n" << distCoeffs << "\n\n";
+            std::cout << "Camera Matrix:\n"
+                      << cameraMatrix << "\nDistortion Coefficients:\n"
+                      << distCoeffs << "\n\n";
 
             // cameraMatrix = cv::getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, cv::Size(video.width(), video.height()), 0);
         }
@@ -62,9 +64,12 @@ namespace crv
         bool estimateCameraToMarkers(const cv::Mat &image, const cv::Mat &cameraMatrix, const cv::Mat &distCoeffs, CameraToMarkerData &data, float markerSize, bool storeImage)
         {
             cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
+            cv::Ptr<cv::aruco::GridBoard> board = cv::aruco::GridBoard::create(5, 7, 0.08, 0.01, dictionary);
 
+            cv::aruco::DetectorParameters detectorParams = cv::aruco::DetectorParameters();
             std::vector<int> ids;
             std::vector<std::vector<cv::Point2f>> corners;
+
             cv::aruco::detectMarkers(image, dictionary, corners, ids);
 
             if (ids.size() <= 0)
@@ -72,43 +77,39 @@ namespace crv
                 return false;
             }
 
-            std::vector<cv::Vec3d> rvecs, tvecs;
-            cv::aruco::estimatePoseSingleMarkers(corners, markerSize, cameraMatrix, distCoeffs, rvecs, tvecs);
+            cv::Vec3d rvec, tvec;
+            int valid = cv::aruco::estimatePoseBoard(corners, ids, board, cameraMatrix, distCoeffs, rvec, tvec);
+
+            if (!valid)
+            {
+                std::cout << "Failed to estimate pose!" << std::endl;
+            }
 
             if (storeImage)
             {
                 image.copyTo(data.image);
+                cv::aruco::drawDetectedMarkers(data.image, corners, ids);
+                cv::drawFrameAxes(data.image, cameraMatrix, distCoeffs, rvec, tvec, 0.1);
             }
-            
-            // create transformation matrices
-            for (int idx = 0; idx < ids.size(); idx++)
+
+            // create the rotation matrix
+            cv::Matx33d rotMatrix;
+            cv::Rodrigues(rvec, rotMatrix);
+
+            // create the transformation matrix by concatenating the rotation and translation
+            cv::Matx44d transform = cv::Matx44d::eye(); // 4x4 identity matrix
+            for (int i = 0; i < 3; i++)
             {
-                cv::Matx33d rot_mat;
-                cv::Rodrigues(rvecs[idx], rot_mat);
-
-                // create the transformation matrix by concatenating the rotation and translation
-                cv::Matx44d transform = cv::Matx44d::eye(); // 4x4 identity matrix
-                for (int i = 0; i < 3; i++)
+                for (int j = 0; j < 3; j++)
                 {
-                    for (int j = 0; j < 3; j++)
-                    {
-                        transform(i, j) = rot_mat(i, j);
-                    }
-                    transform(i, 3) = tvecs[idx][i];
+                    transform(i, j) = rotMatrix(i, j);
                 }
-
-                // fill the data
-                CameraToMarkerData::Data d;
-                d.transform = std::move(transform);
-                d.markerId = ids[idx];
-                data.data.push_back(std::move(d));
-
-                // draw the result
-                if (storeImage)
-                {
-                    cv::drawFrameAxes(data.image, cameraMatrix, distCoeffs, rvecs[idx], tvecs[idx], 0.1);
-                }
+                transform(i, 3) = tvec[i];
             }
+
+            // fill the data
+            CameraToMarkerData d;
+            d.transform = std::move(transform);
 
             return true;
         }

@@ -22,7 +22,10 @@ namespace crv
         while(sceneVideo.getNextFrame(frame))
         {
             crv::calib::CameraToMarkerData data;
-            crv::calib::estimateCameraToMarkers(frame, cameraMatrix, distCoeffs, data, m_params.markerSize, false);
+            crv::calib::estimateCameraToMarkers(frame, cameraMatrix, distCoeffs, data, m_params.markerSize, true);
+
+            cv::imshow("", data.image);
+            cv::waitKey(0);
         }
     }
 }
