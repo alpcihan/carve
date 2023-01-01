@@ -1,4 +1,5 @@
 #include "crv/calib.h"
+#include "crv/log.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
@@ -6,7 +7,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/types_c.h>
 #include <stdio.h>
-#include <iostream>
 
 namespace crv
 {
@@ -49,15 +49,13 @@ namespace crv
                 }
             }
 
-            std::cout << "\nCalibrating the camera... (This might take some time dependent on the total frames used.)\n\n";
+            CRV_INFO("Calibrating the camera... (This might take some time dependent on the total frames used.)");
 
             cv::Mat R, T;
             cv::calibrateCamera(objpoints, imgpoints, cv::Size(gray.cols, gray.rows), cameraMatrix, distCoeffs, R, T);
 
-            std::cout << "Camera Matrix:\n"
-                      << cameraMatrix << "\nDistortion Coefficients:\n"
-                      << distCoeffs << "\n\n";
-
+            CRV_INFO("Camera Matrix:\n" << cameraMatrix << "\nDistortion Coefficients:\n" << distCoeffs << "\n");
+                      
             // cameraMatrix = cv::getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, cv::Size(video.width(), video.height()), 0);
         }
 
@@ -82,7 +80,7 @@ namespace crv
 
             if (!valid)
             {
-                std::cout << "Failed to estimate pose!" << std::endl;
+                CRV_INFO("Failed to estimate pose!");
             }
 
             if (storeImage)

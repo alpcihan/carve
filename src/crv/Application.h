@@ -16,6 +16,7 @@ namespace crv
 
         void init();
         void run();
+        void terminate();
 
     public:
         Application(const Application &) = delete;

@@ -8,19 +8,15 @@ namespace crv
     void Application::init()
     {
         // TODO: read the voxel carver parameters from a config file
-        crv::VoxelCarverParams params;
-        params.calibVideoSource = "";
-        params.sceneVideoSource = "";
-        params.markerSize = 0.05;
-        params.checkerBoardDims = {6, 9};
-        params.calibVideoSkipBy = 24;
-        params.sceneVideoSkipBy = 24;
-
-        m_voxelCarver = std::make_unique<VoxelCarver>(params);
+        m_voxelCarver = std::make_unique<VoxelCarver>(crv::VoxelCarverParams());
     }
 
     void Application::run()
     {
         m_voxelCarver->run();
+    }
+
+    void Application::terminate()
+    {
     }
 }
