@@ -1,6 +1,6 @@
 #pragma once
 
-#include "crv/Application.h"
+#include "crv/application/Application.h"
 #include <iostream>
 
 namespace crv

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.25.1)
 project(voxel-space-carving)
 
 set (CMAKE_CXX_STANDARD 20)
+set (CRV_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/crv/utils/file.h.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/crv/utils/file.h")
 
 include_directories(${CMAKE_BINARY_DIR})
 

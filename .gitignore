@@ -36,6 +36,10 @@ build
 *.dll
 *.o
 *.a
+resources
+
+## Config Files
+**/crv/utils/file.h
 
 ## Visual Studio
 # User-specific files

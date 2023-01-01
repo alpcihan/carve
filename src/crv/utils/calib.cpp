@@ -1,5 +1,5 @@
-#include "crv/calib.h"
-#include "crv/log.h"
+#include "crv/utils/calib.h"
+#include "crv/utils/log.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
@@ -54,8 +54,10 @@ namespace crv
             cv::Mat R, T;
             cv::calibrateCamera(objpoints, imgpoints, cv::Size(gray.cols, gray.rows), cameraMatrix, distCoeffs, R, T);
 
-            CRV_INFO("Camera Matrix:\n" << cameraMatrix << "\nDistortion Coefficients:\n" << distCoeffs << "\n");
-                      
+            CRV_INFO("Camera Matrix:\n"
+                     << cameraMatrix << "\nDistortion Coefficients:\n"
+                     << distCoeffs << "\n");
+
             // cameraMatrix = cv::getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, cv::Size(video.width(), video.height()), 0);
         }
 

@@ -1,6 +1,6 @@
-#include "crv/VoxelCarver.h"
-#include "crv/VideoReader.h"
-#include "crv/calib.h"
+#include "crv/voxel-carver/VoxelCarver.h"
+#include "crv/video-reader/VideoReader.h"
+#include "crv/utils/calib.h"
 
 namespace crv
 {
@@ -23,7 +23,7 @@ namespace crv
         {
             crv::calib::CameraToMarkerData data;
             crv::calib::estimateCameraToMarkers(frame, cameraMatrix, distCoeffs, data, m_params.markerSize, true);
-
+            
             cv::imshow("", data.image);
             cv::waitKey(0);
         }

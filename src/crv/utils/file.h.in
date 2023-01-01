@@ -1,0 +1,4 @@
+#pragma once
+#include <string>
+
+#define CRV_RELATIVE(relativePath) std::string("${CRV_ROOT_PATH}/" + relativePath)

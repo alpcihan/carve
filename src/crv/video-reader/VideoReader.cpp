@@ -1,5 +1,6 @@
-#include "VideoReader.h"
-#include "crv/log.h"
+#include "crv/video-reader/VideoReader.h"
+#include "crv/utils/log.h"
+#include "crv/utils/file.h"
 #include <opencv2/core/types_c.h>
 
 namespace crv
@@ -7,7 +8,7 @@ namespace crv
     VideoReader::VideoReader(const std::string &fileName, uint32_t frameSkip)
         : m_fileName(fileName), m_frameSkip(frameSkip)
     {
-        m_videoCapture.open(fileName);
+        m_videoCapture.open(CRV_RELATIVE(fileName));
 
         if (!m_videoCapture.isOpened())
         {
