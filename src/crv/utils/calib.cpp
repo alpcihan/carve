@@ -58,13 +58,16 @@ namespace crv
                      << out.cameraMatrix << "\nDistortion Coefficients:\n"
                      << out.distCoeffs << "\n");
 
-            // cameraMatrix = cv::getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, cv::Size(video.width(), video.height()), 0);
+            out.optimizedCameraMatrix = cv::getOptimalNewCameraMatrix(out.cameraMatrix, out.distCoeffs, cv::Size(video.width(), video.height()), 0);
+            CRV_INFO("Optimized Camera Matrix:\n"
+                     << out.optimizedCameraMatrix)
         }
 
-        void estimateCamToARBoard(const cv::Mat &image, const Cam &cam, CamToBoardData& out)
-        {       
+        void estimateCamToARBoard(const cv::Mat &image, const Cam &cam, CamToBoardData &out)
+        {
+            float markersX = 5, markersY = 7, markerLength = 0.08, markerDistance = 0.01;
             cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
-            cv::Ptr<cv::aruco::GridBoard> board = cv::aruco::GridBoard::create(5, 7, 0.08, 0.01, dictionary);
+            cv::Ptr<cv::aruco::GridBoard> board = cv::aruco::GridBoard::create(markersX, markersY, markerLength, markerDistance, dictionary);
 
             cv::aruco::DetectorParameters detectorParams = cv::aruco::DetectorParameters();
             std::vector<int> ids;
@@ -85,14 +88,22 @@ namespace crv
                 CRV_INFO("Failed to estimate pose!");
             }
 
+            // create the rotation matrix
+            cv::Matx33d rotMatrix;
+            cv::Rodrigues(out.rVec, rotMatrix);
+
+            // move the coordinate system to the center of the AR board
+            cv::Vec3d t(
+                (markersX*markerLength+(markersX-1)*markerDistance)*0.5,
+                (markersY*markerLength+(markersY-1)*markerDistance)*0.5,
+                0);
+            t = rotMatrix * t;
+            out.tVec += t;
+
             // draw the result
             image.copyTo(out.image);
             cv::aruco::drawDetectedMarkers(out.image, corners, ids);
             cv::drawFrameAxes(out.image, cam.cameraMatrix, cam.distCoeffs, out.rVec, out.tVec, 0.1);
-
-            // create the rotation matrix
-            cv::Matx33d rotMatrix;
-            cv::Rodrigues(out.rVec, rotMatrix);
 
             // create the transformation matrix by concatenating the rotation and translation
             out.transform = cv::Matx44d::eye(); // 4x4 identity matrix
@@ -105,7 +116,18 @@ namespace crv
                 out.transform(i, 3) = out.tVec[i];
             }
 
-            CRV_INFO("Camera to Board:\n" << out.transform);
+            CRV_INFO("Camera to Board:\n"
+                     << out.transform);
+        }
+
+        void evaluateUndistortedImage(const cv::Mat &image, cv::Mat &out, const Cam &cam)
+        {
+            // Compute the maps for remapping the image
+            cv::Mat map1, map2;
+            cv::initUndistortRectifyMap(cam.cameraMatrix, cam.distCoeffs, cv::Mat(), cam.optimizedCameraMatrix, image.size(), CV_16SC2, map1, map2);
+
+            // Remap the image to remove distortion
+            cv::remap(image, out, map1, map2, cv::INTER_LINEAR);
         }
     }
 }

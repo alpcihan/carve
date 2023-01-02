@@ -10,7 +10,8 @@ namespace crv
         struct Cam
         {
             cv::Mat distCoeffs;
-            cv::Mat cameraMatrix;
+            cv::Matx33d cameraMatrix;
+            cv::Matx33d optimizedCameraMatrix;
         };
 
         struct CamToBoardData
@@ -23,5 +24,6 @@ namespace crv
 
         void estimateCamMatrixAndDistortion(VideoReader &video, const cv::Vec2i &checkerBoardDims, Cam &out);
         void estimateCamToARBoard(const cv::Mat &image, const Cam &cam, CamToBoardData& out);
+        void evaluateUndistortedImage(const cv::Mat &image, cv::Mat& out, const Cam &cam);
     }
 }
