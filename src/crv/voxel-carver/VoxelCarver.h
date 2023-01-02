@@ -1,8 +1,11 @@
 #pragma once
 
-#include <string>
+#include "crv/video-reader/VideoReader.h"
+#include "crv/utils/calib.h"
 #include <Eigen/Dense>
 #include <opencv2/opencv.hpp>
+#include <string>
+#include <memory>
 
 namespace crv
 {
@@ -29,5 +32,12 @@ namespace crv
             
         private:
             VoxelCarverParams m_params;
+            calib::Cam m_cam;
+            std::unique_ptr<VideoReader> m_sceneVideo = nullptr;
+
+        private:
+            void _calibCamera(); 
+            void _getThresholdFromTheUser();
+            void _carve();
     };
 }

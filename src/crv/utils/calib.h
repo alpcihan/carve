@@ -7,13 +7,21 @@ namespace crv
 {
     namespace calib
     {
-        struct CameraToMarkerData
+        struct Cam
         {
-            cv::Matx44d transform;
-            cv::Mat image;
+            cv::Mat distCoeffs;
+            cv::Mat cameraMatrix;
         };
 
-        void estimateCameraMatrixAndDistortion(VideoReader &video, const cv::Vec2i &checkerBoardDims, cv::Mat &cameraMatrix, cv::Mat &distCoeffs);
-        bool estimateCameraToMarkers(const cv::Mat &image, const cv::Mat &cameraMatrix, const cv::Mat &distCoeffs, CameraToMarkerData &data, float markerSize = 0.05, bool storeImage = false);
+        struct CamToBoardData
+        {
+            cv::Vec3d rVec, tVec;
+            cv::Matx44d transform;
+            cv::Mat image;
+            bool isValid = true;
+        };
+
+        void estimateCamMatrixAndDistortion(VideoReader &video, const cv::Vec2i &checkerBoardDims, Cam &out);
+        void estimateCamToARBoard(const cv::Mat &image, const Cam &cam, CamToBoardData& out);
     }
 }

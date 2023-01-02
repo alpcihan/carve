@@ -12,7 +12,7 @@ namespace crv
 {
     namespace calib
     {
-        void estimateCameraMatrixAndDistortion(VideoReader &video, const cv::Vec2i &checkerBoardDims, cv::Mat &cameraMatrix, cv::Mat &distCoeffs)
+        void estimateCamMatrixAndDistortion(VideoReader &video, const cv::Vec2i &checkerBoardDims, Cam &out)
         {
             std::vector<std::vector<cv::Point3f>> objpoints; // vector to store vectors of 3D points for each checkerboard image
             std::vector<std::vector<cv::Point2f>> imgpoints; // vector to store vectors of 2D points for each checkerboard image
@@ -52,17 +52,17 @@ namespace crv
             CRV_INFO("Calibrating the camera... (This might take some time dependent on the total frames used.)");
 
             cv::Mat R, T;
-            cv::calibrateCamera(objpoints, imgpoints, cv::Size(gray.cols, gray.rows), cameraMatrix, distCoeffs, R, T);
+            cv::calibrateCamera(objpoints, imgpoints, cv::Size(gray.cols, gray.rows), out.cameraMatrix, out.distCoeffs, R, T);
 
             CRV_INFO("Camera Matrix:\n"
-                     << cameraMatrix << "\nDistortion Coefficients:\n"
-                     << distCoeffs << "\n");
+                     << out.cameraMatrix << "\nDistortion Coefficients:\n"
+                     << out.distCoeffs << "\n");
 
             // cameraMatrix = cv::getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, cv::Size(video.width(), video.height()), 0);
         }
 
-        bool estimateCameraToMarkers(const cv::Mat &image, const cv::Mat &cameraMatrix, const cv::Mat &distCoeffs, CameraToMarkerData &data, float markerSize, bool storeImage)
-        {
+        void estimateCamToARBoard(const cv::Mat &image, const Cam &cam, CamToBoardData& out)
+        {       
             cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
             cv::Ptr<cv::aruco::GridBoard> board = cv::aruco::GridBoard::create(5, 7, 0.08, 0.01, dictionary);
 
@@ -74,44 +74,38 @@ namespace crv
 
             if (ids.size() <= 0)
             {
-                return false;
+                out.isValid = false;
+                return;
             }
 
-            cv::Vec3d rvec, tvec;
-            int valid = cv::aruco::estimatePoseBoard(corners, ids, board, cameraMatrix, distCoeffs, rvec, tvec);
+            int valid = cv::aruco::estimatePoseBoard(corners, ids, board, cam.cameraMatrix, cam.distCoeffs, out.rVec, out.tVec);
 
             if (!valid)
             {
                 CRV_INFO("Failed to estimate pose!");
             }
 
-            if (storeImage)
-            {
-                image.copyTo(data.image);
-                cv::aruco::drawDetectedMarkers(data.image, corners, ids);
-                cv::drawFrameAxes(data.image, cameraMatrix, distCoeffs, rvec, tvec, 0.1);
-            }
+            // draw the result
+            image.copyTo(out.image);
+            cv::aruco::drawDetectedMarkers(out.image, corners, ids);
+            cv::drawFrameAxes(out.image, cam.cameraMatrix, cam.distCoeffs, out.rVec, out.tVec, 0.1);
 
             // create the rotation matrix
             cv::Matx33d rotMatrix;
-            cv::Rodrigues(rvec, rotMatrix);
+            cv::Rodrigues(out.rVec, rotMatrix);
 
             // create the transformation matrix by concatenating the rotation and translation
-            cv::Matx44d transform = cv::Matx44d::eye(); // 4x4 identity matrix
+            out.transform = cv::Matx44d::eye(); // 4x4 identity matrix
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    transform(i, j) = rotMatrix(i, j);
+                    out.transform(i, j) = rotMatrix(i, j);
                 }
-                transform(i, 3) = tvec[i];
+                out.transform(i, 3) = out.tVec[i];
             }
 
-            // fill the data
-            CameraToMarkerData d;
-            d.transform = std::move(transform);
-
-            return true;
+            CRV_INFO("Camera to Board:\n" << out.transform);
         }
     }
 }

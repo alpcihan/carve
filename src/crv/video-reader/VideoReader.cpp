@@ -43,4 +43,11 @@ namespace crv
         
         return true;
     }
+
+    void VideoReader::reset()
+    {
+        m_videoCapture.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, 0);
+        m_nextFrameIndex = 0;
+        CRV_INFO("Reset the frames: " << m_fileName);
+    }
 }

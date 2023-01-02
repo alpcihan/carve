@@ -14,6 +14,7 @@ namespace crv
         ~VideoReader();
 
         bool getNextFrame(cv::Mat &frame);
+        void reset();
         
         uint32_t width() { return m_dims[0]; } 
         uint32_t height() { return m_dims[1]; } 
