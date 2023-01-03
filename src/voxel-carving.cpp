@@ -1,10 +1,10 @@
-#include "crv/application/Application.h"
+#include "crv/voxel-carver/VoxelCarver.h"
 
 int main()
 {    
-    crv::Application::get().init();
-    crv::Application::get().run();
-    crv::Application::get().terminate();
+    crv::VoxelCarver* voxelCarver = new crv::VoxelCarver(crv::VoxelCarverParams());
+    voxelCarver->run();
 
+    delete voxelCarver;
     return 0;
 }
