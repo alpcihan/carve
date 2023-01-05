@@ -6,6 +6,9 @@ build
 ## MacOS
 .DS_Store
 
+## Mesh 
+*.ply
+
 ## Media
 *.[Mm][Oo][Vv]
 *.[Mm][Pp]4

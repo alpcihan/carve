@@ -1,5 +1,4 @@
 #include "crv/utils/segment.h"
-#include <opencv2/opencv.hpp>
 
 namespace crv
 {
@@ -10,6 +9,8 @@ namespace crv
             cv::Mat mask;
             cv::inRange(image, cv::Scalar(0, 0, 30), cv::Scalar(30, 20, 255), mask);
             cv::bitwise_and(image, image, masked, mask);
+
+            cv::cvtColor(masked, masked, cv::COLOR_BGR2GRAY);
         }
     }
 }

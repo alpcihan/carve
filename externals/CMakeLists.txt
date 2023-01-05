@@ -8,12 +8,8 @@ set(BUILD_opencv_aruco TRUE CACHE BOOL "BUILD OpenCV ARuco")
 set(OPENCV_EXTRA_MODULES_PATH ${CMAKE_CURRENT_SOURCE_DIR}/opencv_contrib/modules CACHE PATH "Path to OpenCV extra modules")
 
 add_subdirectory(opencv) # add before eigen (due to the custom target uninstall conflict)
-add_subdirectory(eigen)
 
 target_include_directories(externals INTERFACE
-    # eigen
-    ./eigen/Eigen/src
-
     # opencv
     ./opencv/include
     ./opencv/modules/calib3d/include
@@ -92,9 +88,6 @@ target_include_directories(externals INTERFACE
 )
 
 target_link_libraries(externals INTERFACE 
-    # eigen
-    eigen
-
     # opencv
     opencv_core
     opencv_highgui

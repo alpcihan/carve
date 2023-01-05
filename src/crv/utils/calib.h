@@ -1,7 +1,7 @@
 #pragma once
 
+#include "crv/shared.h"
 #include "crv/video-reader/VideoReader.h"
-#include <Eigen/Dense>
 
 namespace crv
 {
@@ -16,14 +16,12 @@ namespace crv
 
         struct CamToBoardData
         {
-            cv::Vec3d rVec, tVec;
-            cv::Matx44d transform;
-            cv::Mat image;
-            bool isValid = true;
+            cv::Vec3d rVec;
+            cv::Vec3d tVec;
         };
 
         void estimateCamMatrixAndDistortion(VideoReader &video, const cv::Vec2i &checkerBoardDims, Cam &out);
-        void estimateCamToARBoard(const cv::Mat &image, const Cam &cam, CamToBoardData& out);
-        void evaluateUndistortedImage(const cv::Mat &image, cv::Mat& out, const Cam &cam);
+        bool estimateCamToARBoard(const cv::Mat &image, const Cam &cam, CamToBoardData& out);
+        void calculateUndistortedImage(const cv::Mat &image, const Cam &cam, cv::Mat& out);
     }
 }

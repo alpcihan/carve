@@ -1,9 +1,6 @@
 #pragma once
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <string>
-#include <Eigen/Dense>
+#include "crv/shared.h"
 
 namespace crv
 {
@@ -14,19 +11,23 @@ namespace crv
         ~VideoReader();
 
         bool getNextFrame(cv::Mat &frame);
+
+        int getFrameIndex() const { return m_frameIndex; }
+        std::string getFileName() const { return m_fileName; }
+
         void reset();
         
-        uint32_t width() { return m_dims[0]; } 
-        uint32_t height() { return m_dims[1]; } 
+        uint32_t width() const { return m_dims[0]; } 
+        uint32_t height() const { return m_dims[1]; } 
 
     private:
-        Eigen::Vector2i m_dims;
+        cv::Vec2i m_dims;
         uint32_t m_totalFrames = 0;
         uint32_t m_frameSkip;
 
         std::string m_fileName = "";
 
         cv::VideoCapture m_videoCapture;
-        int m_nextFrameIndex = 0;
+        int m_frameIndex = 0;
     };
 }

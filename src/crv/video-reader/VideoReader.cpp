@@ -1,7 +1,4 @@
 #include "crv/video-reader/VideoReader.h"
-#include "crv/utils/log.h"
-#include "crv/utils/file.h"
-#include <opencv2/core/types_c.h>
 
 namespace crv
 {
@@ -17,7 +14,8 @@ namespace crv
         }
 
         m_totalFrames = m_videoCapture.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_COUNT);
-        m_dims = Eigen::Vector2i(m_videoCapture.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_WIDTH), m_videoCapture.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_HEIGHT));
+        m_dims = cv::Vec2i(m_videoCapture.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_WIDTH), m_videoCapture.get(cv::VideoCaptureProperties::CAP_PROP_FRAME_HEIGHT));
+        
         CRV_INFO("File is opened: " << m_fileName);
         CRV_INFO("Total frames: " << m_totalFrames);
     }
@@ -29,7 +27,7 @@ namespace crv
 
     bool VideoReader::getNextFrame(cv::Mat &frame)
     {
-        m_videoCapture.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, m_nextFrameIndex);
+        m_videoCapture.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, m_frameIndex);
         m_videoCapture >> frame;
 
         if (frame.empty())
@@ -38,8 +36,8 @@ namespace crv
             return false;
         }
 
-        CRV_INFO("Read the frame: " << m_nextFrameIndex << "/" << m_totalFrames << " of " << m_fileName);
-        m_nextFrameIndex += m_frameSkip;
+        CRV_INFO("Read the frame: " << m_frameIndex << "/" << m_totalFrames << " of " << m_fileName);
+        m_frameIndex += m_frameSkip;
         
         return true;
     }
@@ -47,7 +45,7 @@ namespace crv
     void VideoReader::reset()
     {
         m_videoCapture.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, 0);
-        m_nextFrameIndex = 0;
+        m_frameIndex = 0;
         CRV_INFO("Reset the frames: " << m_fileName);
     }
 }
