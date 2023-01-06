@@ -42,7 +42,7 @@ build
 resources
 
 ## Config Files
-**/crv/utils/file.h
+**/src/carve/utils/file.h
 
 ## Visual Studio
 # User-specific files

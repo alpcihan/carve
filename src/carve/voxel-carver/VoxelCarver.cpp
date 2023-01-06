@@ -1,5 +1,5 @@
-#include "crv/voxel-carver/VoxelCarver.h"
-#include "crv/utils/segment.h"
+#include "carve/voxel-carver/VoxelCarver.h"
+#include "carve/utils/segment.h"
 
 namespace crv
 {
