@@ -7,21 +7,8 @@ namespace crv
 {
     namespace calib
     {
-        struct Cam
-        {
-            cv::Mat distCoeffs;
-            cv::Matx33d cameraMatrix;
-            cv::Matx33d optimizedCameraMatrix;
-        };
-
-        struct CamToBoardData
-        {
-            cv::Vec3d rVec;
-            cv::Vec3d tVec;
-        };
-
-        void estimateCamMatrixAndDistortion(VideoReader &video, const cv::Vec2i &checkerBoardDims, Cam &out);
-        bool estimateCamToARBoard(const cv::Mat &image, const Cam &cam, CamToBoardData& out);
-        void calculateUndistortedImage(const cv::Mat &image, const Cam &cam, cv::Mat& out);
+        void estimateCamMatrixAndDistortion(VideoReader &video, const cv::Vec2i &checkerBoardDims, cv::Matx33d& intrinsics, cv::Mat& distCoeffs);
+        bool estimateCamToARBoard(const cv::Mat &image, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, cv::Vec3d& rVec, cv::Vec3d& tVec);
+        // void calculateUndistortedImage(const cv::Mat &image, const Cam &cam, cv::Mat& out);
     }
 }

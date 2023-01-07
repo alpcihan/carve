@@ -8,12 +8,7 @@ namespace crv
 {
     struct VoxelCarverParams
     {
-        std::string calibVideoSource = "resources/chessboard.mp4"; // camera calibration video source (for calibration with checkerboard)
-        std::string sceneVideoSource = "resources/dragon.mp4";     // video source with object to carve and Aruco markers
-        cv::Vec2i checkerBoardDims = {6, 9};                       // vertical and horizontal grid count of the checkerboard
-        uint32_t calibVideoSkipBy = 24;                            // amount of frames to skip for each frame read from the calibration video
-        uint32_t sceneVideoSkipBy = 24;                            // amount of frames to skip for each frame read from the main scene video
-        uint32_t voxelSpaceDim = 100;                              // dimension (a) of the a*a*a voxel cube space
+        uint32_t voxelSpaceDim = 100;                              // dimension (a) of the 3D a*a*a voxel cube space
         double volumeScale = 1.0;                                  // size of the voxel cube space
     };
 
@@ -22,19 +17,18 @@ namespace crv
     public:
         VoxelCarver(const VoxelCarverParams &voxelCarverParams);
         
-        void run();
-        void saveAsPLY(const std::string& fileName = "output.ply");
+        void carveByBinaryImage(const cv::Mat& frame, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, const cv::Vec3d& rVec, const cv::Vec3d& tVec);
+
+        void saveCurrentStateAsPLY(const std::string& fileName = "output.ply");
 
     private:
         VoxelCarverParams m_params;
-        calib::Cam m_cam;
-        std::unique_ptr<VideoReader> m_sceneVideo = nullptr;
-        std::vector<std::vector<std::vector<bool>>> m_space; // TODO: replace with a more efficient solution
+
+        std::vector<bool> m_space;                                // TODO: replace with a more efficient solution
         uint32_t m_pointCount;
 
     private:
         void _initVoxelSpace(); 
-        void _calibCamera();
-        void _carveSegmentedImage(const cv::Mat &image, const calib::CamToBoardData &camToBoardData);  
+        void _carveByBinaryImage(const cv::Mat& binaryImage, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, const cv::Vec3d& rVec, const cv::Vec3d& tVec);  
     };
 }

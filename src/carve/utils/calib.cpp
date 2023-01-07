@@ -4,7 +4,7 @@ namespace crv
 {
     namespace calib
     {
-        void estimateCamMatrixAndDistortion(VideoReader &video, const cv::Vec2i &checkerBoardDims, Cam &out)
+        void estimateCamMatrixAndDistortion(VideoReader &video, const cv::Vec2i &checkerBoardDims, cv::Matx33d& intrinsics, cv::Mat& distCoeffs)
         {
             std::vector<std::vector<cv::Point3f>> objpoints; // vector to store vectors of 3D points for each checkerboard image
             std::vector<std::vector<cv::Point2f>> imgpoints; // vector to store vectors of 2D points for each checkerboard image
@@ -38,17 +38,19 @@ namespace crv
             CRV_INFO("Calibrating the camera ("<< video.getFileName() <<")... (This might take some time dependent on the total frames used.)");
 
             cv::Mat R, T;
-            cv::calibrateCamera(objpoints, imgpoints, cv::Size(gray.cols, gray.rows), out.cameraMatrix, out.distCoeffs, R, T);
+            cv::calibrateCamera(objpoints, imgpoints, cv::Size(gray.cols, gray.rows), intrinsics, distCoeffs, R, T);
             CRV_INFO("Camera Matrix:\n"
-                     << out.cameraMatrix << "\nDistortion Coefficients:\n"
-                     << out.distCoeffs);
+                     << intrinsics << "\nDistortion Coefficients:\n"
+                     << distCoeffs);
 
-            out.optimizedCameraMatrix = cv::getOptimalNewCameraMatrix(out.cameraMatrix, out.distCoeffs, cv::Size(video.width(), video.height()), 0);
-            CRV_INFO("Optimized Camera Matrix:\n"
-                     << out.optimizedCameraMatrix)
+            // optimizedCameraMatrix = cv::getOptimalNewCameraMatrix(out.cameraMatrix, out.distCoeffs, cv::Size(video.width(), video.height()), 0);
+            // CRV_INFO("Optimized Camera Matrix:\n"
+            //         << out.optimizedCameraMatrix)
+
+            video.reset();
         }
 
-        bool estimateCamToARBoard(const cv::Mat &image, const Cam &cam, CamToBoardData &out)
+        bool estimateCamToARBoard(const cv::Mat &image, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, cv::Vec3d& rVec, cv::Vec3d& tVec)
         {
             float markersX = 5, markersY = 7, markerLength = 0.08, markerDistance = 0.01;
             cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
@@ -66,7 +68,7 @@ namespace crv
                 return false;
             }
 
-            int valid = cv::aruco::estimatePoseBoard(corners, ids, board, cam.cameraMatrix, cam.distCoeffs, out.rVec, out.tVec);
+            int valid = cv::aruco::estimatePoseBoard(corners, ids, board, intrinsics, distCoeffs, rVec, tVec);
 
             if (!valid)
             {
@@ -76,7 +78,7 @@ namespace crv
 
             // create the rotation matrix
             cv::Matx33d rotMatrix;
-            cv::Rodrigues(out.rVec, rotMatrix);
+            cv::Rodrigues(rVec, rotMatrix);
 
             // move the coordinate system to the center of the AR board
             cv::Vec3d t(
@@ -84,7 +86,7 @@ namespace crv
                 (markersY * markerLength + (markersY - 1) * markerDistance) * 0.5,
                 0);
             t = rotMatrix * t;
-            out.tVec += t;
+            tVec += t;
 
             return true;
             // draw the result
@@ -93,6 +95,7 @@ namespace crv
             // cv::drawFrameAxes(out.image, cam.cameraMatrix, cam.distCoeffs, out.rVec, out.tVec, 0.1);
         }
 
+        /*
         void calculateUndistortedImage(const cv::Mat &image, const Cam &cam, cv::Mat &out)
         {
             // Compute the maps for remapping the image
@@ -102,5 +105,6 @@ namespace crv
             // Remap the image to remove distortion
             cv::remap(image, out, map1, map2, cv::INTER_LINEAR);
         }
+        */
     }
 }
