@@ -9,7 +9,7 @@ namespace crv
     struct VoxelCarverParams
     {
         uint32_t voxelSpaceDim = 100;                              // dimension (a) of the 3D a*a*a voxel cube space
-        double volumeScale = 1.0;                                  // size of the voxel cube space
+        float volumeScale = 1.0;                                   // scale of the voxel cube space
     };
 
     class VoxelCarver
@@ -18,17 +18,23 @@ namespace crv
         VoxelCarver(const VoxelCarverParams &voxelCarverParams);
         
         void carveByBinaryImage(const cv::Mat& frame, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, const cv::Vec3d& rVec, const cv::Vec3d& tVec);
+        void saveCurrentStateAsPLY(const std::string& fileName) const;
 
-        void saveCurrentStateAsPLY(const std::string& fileName = "output.ply");
+    private: 
+        // enum class _VoxelState: 
+        // if the voxel is carved, it stores the value "CARVED".
+        // if a voxel is not carved and it do not have a normal vector estimation, it stores the value "NOT_CARVED".
+        // if a voxel is not carved and it has a normal vector estimation, it represents the estimated normal vector 
+        //    (with six states: UP, BOTTOM, FRONT, BACK, RIGHT, LEFT) of the voxel with respect to the voxel space boundaries.
+        enum class _VoxelState : uint8_t {CARVED, NOT_CARVED, UP, BOTTOM, FRONT, BACK, RIGHT, LEFT};
 
     private:
         VoxelCarverParams m_params;
-
-        std::vector<bool> m_space;                                // TODO: replace with a more efficient solution
+        std::vector<_VoxelState> m_space;                         // TODO: replace with a more efficient solution
         uint32_t m_pointCount;
 
     private:
         void _initVoxelSpace(); 
-        void _carveByBinaryImage(const cv::Mat& binaryImage, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, const cv::Vec3d& rVec, const cv::Vec3d& tVec);  
+        void _carveByBinaryImage(const cv::Mat& binaryImage, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, const cv::Vec3d& rVec, const cv::Vec3d& tVec);      
     };
 }

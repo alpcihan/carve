@@ -10,12 +10,11 @@ namespace crv
         VideoReader(const std::string &fileName, uint32_t frameSkip = 1);
         ~VideoReader();
 
-        bool getNextFrame(cv::Mat &frame);
-
+        bool readNextFrame(cv::Mat &frame);
         int getFrameIndex() const { return m_frameIndex; }
         std::string getFileName() const { return m_fileName; }
 
-        void reset();
+        void reset(uint32_t frameIndex = 0);
         
         uint32_t width() const { return m_dims[0]; } 
         uint32_t height() const { return m_dims[1]; } 

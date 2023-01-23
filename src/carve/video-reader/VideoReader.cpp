@@ -25,7 +25,7 @@ namespace crv
         m_videoCapture.release();
     }
 
-    bool VideoReader::getNextFrame(cv::Mat &frame)
+    bool VideoReader::readNextFrame(cv::Mat &frame)
     {
         m_videoCapture.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, m_frameIndex);
         m_videoCapture >> frame;
@@ -42,10 +42,10 @@ namespace crv
         return true;
     }
 
-    void VideoReader::reset()
+    void VideoReader::reset(uint32_t frameIndex)
     {
-        m_videoCapture.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, 0);
-        m_frameIndex = 0;
+        m_videoCapture.set(cv::VideoCaptureProperties::CAP_PROP_POS_FRAMES, frameIndex);
+        m_frameIndex = frameIndex;
         CRV_INFO("Reset the frames: " << m_fileName);
     }
 }

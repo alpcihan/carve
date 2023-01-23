@@ -13,10 +13,10 @@ namespace crv
     {
         _carveByBinaryImage(binaryImage, intrinsics, distCoeffs, rVec, tVec);
     }
-
-    void VoxelCarver::saveCurrentStateAsPLY(const std::string& fileName)
+   
+    void VoxelCarver::saveCurrentStateAsPLY(const std::string& fileName) const
     {
-        CRV_INFO("Writing carved point cloud into \"output.ply\"...");
+        CRV_INFO("Writing carved point cloud into: " << fileName << "...");
 
         std::ofstream file(CRV_RELATIVE(fileName));
 
@@ -32,7 +32,7 @@ namespace crv
                 {
                     uint32_t i1D = (k * size + j) * size + i;
 
-                    if (!m_space[i1D])
+                    if (m_space[i1D] == _VoxelState::CARVED)
                     {
                         continue;
                     }
@@ -43,7 +43,7 @@ namespace crv
             }
         }
 
-        CRV_INFO("Saved the carved point cloud into \"output.ply\".");
+        CRV_INFO("Saved the carved point cloud into " << fileName);
 
         file.close();
     }
@@ -51,7 +51,7 @@ namespace crv
     void VoxelCarver::_initVoxelSpace()
     {
         uint32_t size = m_params.voxelSpaceDim * m_params.voxelSpaceDim * m_params.voxelSpaceDim;
-        m_space = std::vector<bool>(size,  true);
+        m_space = std::vector<_VoxelState>(size, _VoxelState::NOT_CARVED);
         m_pointCount = size;
 
         CRV_INFO("Initialized a voxel space with the dimensions: " << m_params.voxelSpaceDim << " " << m_params.voxelSpaceDim << " " << m_params.voxelSpaceDim);
@@ -61,22 +61,21 @@ namespace crv
     {
         CRV_INFO("Carving... (This might take some time)");
 
-        // voxel to image solution
         double s = m_params.volumeScale;
-        double shalf = s / 2;
+        double sHalf = s / 2;
         double off = s / m_params.voxelSpaceDim;
         uint32_t dim = m_params.voxelSpaceDim;
         
         cv::Matx33d rot;
         cv::Rodrigues(rVec, rot);
 
-        for (double i = 0; i < dim; i++)
+        for (uint32_t i = 0; i < dim; i++)
         {
-            double x = (i * off) - shalf;
-            for (double j = 0; j < dim; j++)
+            double x = (i * off) - sHalf;
+            for (uint32_t j = 0; j < dim; j++)
             {
-                double y = (j * off) - shalf;
-                for (double k = 0; k < dim; k++)
+                double y = (j * off) - sHalf;
+                for (uint32_t k = 0; k < dim; k++)
                 {
                     double z = (k * off) - s;
 
@@ -88,28 +87,29 @@ namespace crv
                     uint32_t u = a[0];
                     uint32_t v = a[1];
 
-                    if (m_space[i1D] == false)
+                    // continue if the voxel is already carved
+                    if (m_space[i1D] == _VoxelState::CARVED)
                     {
                         continue;
                     }
 
+                    // carve the voxel if it's 2D projection is outside the camera's screen space 
                     if (u < 0 || v < 0 || u >= binaryImage.cols || v >= binaryImage.rows)
                     {
                         m_pointCount--;
-                        m_space[i1D] = false;
+                        m_space[i1D] = _VoxelState::CARVED;
                         continue;
                     }
 
-                    if (binaryImage.at<uchar>(int(v), int(u)) != 0)
+                    // carve the voxel if it's 2D projection corresponds to a black pixel at the camera's screen space  
+                    if (binaryImage.at<uchar>(int(v), int(u)) == 0)
                     {
-                        continue;
+                        m_pointCount--;
+                        m_space[i1D] = _VoxelState::CARVED;
                     }
-
-                    m_pointCount--;
-                    m_space[i1D] = false;
                 }
             }
-        }
+        } 
 
         CRV_INFO("Carved: " << m_space.size() - m_pointCount << " points in total.");
     }

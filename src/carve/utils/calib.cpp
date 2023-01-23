@@ -6,6 +6,8 @@ namespace crv
     {
         void estimateCamMatrixAndDistortion(VideoReader &video, const cv::Vec2i &checkerBoardDims, cv::Matx33d& intrinsics, cv::Mat& distCoeffs)
         {
+            uint32_t initialFrameIndex = video.getFrameIndex(); // to restore the frame index flag after the camera calibration
+
             std::vector<std::vector<cv::Point3f>> objpoints; // vector to store vectors of 3D points for each checkerboard image
             std::vector<std::vector<cv::Point2f>> imgpoints; // vector to store vectors of 2D points for each checkerboard image
             std::vector<cv::Point2f> corner_pts;             // vector to store the pixel coordinates of detected checker board corners
@@ -22,7 +24,7 @@ namespace crv
 
             // get the object and image points of each frame
             cv::Mat frame, gray;
-            while (video.getNextFrame(frame))
+            while (video.readNextFrame(frame))
             {
                 cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
 
@@ -47,10 +49,10 @@ namespace crv
             // CRV_INFO("Optimized Camera Matrix:\n"
             //         << out.optimizedCameraMatrix)
 
-            video.reset();
+            video.reset(initialFrameIndex); // restore the frame index flag
         }
 
-        bool estimateCamToARBoard(const cv::Mat &image, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, cv::Vec3d& rVec, cv::Vec3d& tVec)
+        bool estimateCamToArUcoBoard(const cv::Mat &image, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, cv::Vec3d& rVec, cv::Vec3d& tVec)
         {
             float markersX = 5, markersY = 7, markerLength = 0.08, markerDistance = 0.01;
             cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
@@ -89,10 +91,6 @@ namespace crv
             tVec += t;
 
             return true;
-            // draw the result
-            // image.copyTo(out.image);
-            // cv::aruco::drawDetectedMarkers(out.image, corners, ids);
-            // cv::drawFrameAxes(out.image, cam.cameraMatrix, cam.distCoeffs, out.rVec, out.tVec, 0.1);
         }
 
         /*
