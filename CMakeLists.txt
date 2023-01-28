@@ -28,6 +28,12 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     externals
 )
 
+# log
+option(CARVE_ENABLE_INFO_LOGS "Enable info logs" ON)
+if(CARVE_ENABLE_INFO_LOGS)
+    add_definitions(-DCRV_ENABLE_INFO_LOGS)
+endif()
+
 # examples
 option(CARVE_BUILD_EXAMPLES "Build the examples for carve" ON)
 if(CARVE_BUILD_EXAMPLES)
