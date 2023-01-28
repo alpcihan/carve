@@ -1,4 +1,5 @@
 #include "carve/utils/calib.h"
+#include "carve/video-reader/VideoReader.h"
 
 namespace crv
 {
@@ -92,17 +93,5 @@ namespace crv
 
             return true;
         }
-
-        /*
-        void calculateUndistortedImage(const cv::Mat &image, const Cam &cam, cv::Mat &out)
-        {
-            // Compute the maps for remapping the image
-            cv::Mat map1, map2;
-            cv::initUndistortRectifyMap(cam.cameraMatrix, cam.distCoeffs, cv::Mat(), cam.optimizedCameraMatrix, image.size(), CV_16SC2, map1, map2);
-
-            // Remap the image to remove distortion
-            cv::remap(image, out, map1, map2, cv::INTER_LINEAR);
-        }
-        */
     }
 }

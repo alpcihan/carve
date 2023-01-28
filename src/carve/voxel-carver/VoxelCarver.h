@@ -1,8 +1,6 @@
 #pragma once
 
 #include "carve/shared.h"
-#include "carve/video-reader/VideoReader.h"
-#include "carve/utils/calib.h"
 
 namespace crv
 {
