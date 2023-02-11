@@ -8,6 +8,8 @@ build
 
 ## Mesh 
 *.ply
+*.obj
+*.off
 
 ## Media
 *.[Mm][Oo][Vv]

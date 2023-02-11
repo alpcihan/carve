@@ -21,10 +21,12 @@ namespace crv
 
         void saveCurrentStateAsPLY(const std::string& fileName = "output.ply");
 
+        void marche(const std::string& fileName);
+
     private:
         VoxelCarverParams m_params;
 
-        std::vector<bool> m_space;                                // TODO: replace with a more efficient solution
+        std::vector<bool> m_space;                                // TODO: replace with a more efficient solution //think about mesh writing function
         uint32_t m_pointCount;
 
     private:

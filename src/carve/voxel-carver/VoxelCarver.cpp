@@ -1,6 +1,15 @@
 #include "carve/voxel-carver/VoxelCarver.h"
 #include "carve/utils/segment.h"
 
+
+#include "carve/ex2utils/Eigen.h"
+#include "carve/ex2utils/ImplicitSurface.h"
+#include "carve/ex2utils/Volume.h"
+#include "carve/ex2utils/MarchingCubes.h"
+
+
+
+
 namespace crv
 {
     VoxelCarver::VoxelCarver(const VoxelCarverParams &voxelCarverParams)
@@ -32,7 +41,21 @@ namespace crv
                 {
                     uint32_t i1D = (k * size + j) * size + i;
 
-                    if (!m_space[i1D])
+
+                    uint sum =0;
+                    for(int xx=-1;xx<2;xx++) {
+                        if (i==0 || i==size-1) continue;
+                        for(int yy=-1;yy<2;yy++) {
+                            if (j==0 || j==size-1) continue;
+                            for(int zz=-1;zz<2;zz++) {
+                                if (k==0 || k==size-1) continue;
+                                sum+=m_space[((k+zz) * size + j+yy) * size + i+xx];
+                            }
+                        }
+                    }
+
+
+                    if (!m_space[i1D] || sum>20)
                     {
                         continue;
                     }
@@ -47,6 +70,73 @@ namespace crv
 
         file.close();
     }
+
+
+    void VoxelCarver::marche(const std::string& fileName){
+
+        // implicit surface
+        ImplicitSurface* surface;
+        //surface = new RBF(m_space);
+        surface = new Hoppe(m_space);
+        
+        CRV_INFO("Filling Volume -----------------");
+        // fill volume with signed distance values
+        unsigned int mc_res = 100; //m_params.voxelSpaceDim; // resolution of the grid, for debugging you can reduce the resolution (-> faster)
+        Volume vol(Vector3d(-0.1,-0.1,-0.1), Vector3d(1.1,1.1,1.1), mc_res, mc_res, mc_res, 1);
+        for (unsigned int x = 0; x < vol.getDimX(); x++)
+        {
+            CRV_INFO("Filling slice: "<<x)
+            for (unsigned int y = 0; y < vol.getDimY(); y++)
+            {
+                for (unsigned int z = 0; z < vol.getDimZ(); z++)
+                {
+                    Eigen::Vector3d p = vol.pos(x, y, z);
+                    double val = surface->Eval(p);
+                    vol.set(x,y,z, val);
+                }
+
+            }
+        }
+
+        CRV_INFO("Filling DONE -----------------");
+
+    
+
+        // extract the zero iso-surface using marching cubes
+        SimpleMesh mesh;
+        for (unsigned int x = 0; x < vol.getDimX() - 1; x++)
+        {
+            std::cerr << "Marching Cubes on slice " << x << " of " << vol.getDimX() << std::endl;
+
+            for (unsigned int y = 0; y < vol.getDimY() - 1; y++)
+            {
+                for (unsigned int z = 0; z < vol.getDimZ() - 1; z++)
+                {
+                    ProcessVolumeCell(&vol, x, y, z, 0.00f, &mesh);
+                }
+            }
+        }
+
+        // write mesh to file
+        if (!mesh.WriteMesh(fileName))
+        {
+            std::cout << "ERROR: unable to write output file!" << std::endl;
+            return ;
+        }
+
+        CRV_INFO("DONEEEE")
+
+
+    }
+
+
+
+
+
+
+
+
+
 
     void VoxelCarver::_initVoxelSpace()
     {

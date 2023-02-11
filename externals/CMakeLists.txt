@@ -88,6 +88,16 @@ target_include_directories(externals
         ./opencv_contrib/modules/xphoto/include
 )
 
+
+set(LIBRARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../Libs CACHE PATH "Path to lib folder")
+set(Eigen3_DIR ${LIBRARY_DIR}/Eigen/share/eigen3/cmake CACHE PATH "Path to installed Eigen")
+find_package(Eigen3 REQUIRED)
+
+find_package(PCL 1.3 REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 target_link_libraries(externals 
     INTERFACE 
         # opencv
@@ -96,4 +106,6 @@ target_link_libraries(externals
         opencv_imgproc
         opencv_calib3d
         opencv_aruco
+        Eigen3::Eigen
+        ${PCL_LIBRARIES}
 )
