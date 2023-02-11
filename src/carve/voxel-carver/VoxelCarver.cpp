@@ -48,6 +48,54 @@ namespace crv
         file.close();
     }
 
+    void VoxelCarver::saveCurrentStateAsMesh(const std::string& fileName) const
+    {
+        CRV_INFO("Writing carved mesh into: " << fileName << "...");
+
+        std::ofstream file(CRV_RELATIVE(fileName));
+
+        file << "ply\nformat ascii 1.0\nelement vertex " << m_pointCount << "\nproperty float x\nproperty float y\nproperty float z\nend_header\n";
+
+        uint32_t size = m_params.voxelSpaceDim;
+
+        for (int i = 0; i < m_params.voxelSpaceDim - 1; i++)
+        {
+            for (int j = 0; j < m_params.voxelSpaceDim - 1; j++)
+            {
+                for (int k = 0; k < m_params.voxelSpaceDim - 1; k++)
+                {
+                    // get the corner values of the voxel
+                    _VoxelState corners[8] = {
+                        m_space[((k) * size + (j)) * size + (i)],
+                        m_space[((k)*size + (j)) * size + (i+1)],
+                        m_space[((k)*size + (j+1)) * size + (i+1)],
+                        m_space[((k)*size + (j+1)) * size + (i)],
+                        m_space[((k+1)*size + (j)) * size + (i)],
+                        m_space[((k+1)*size + (j)) * size + (i+1)],
+                        m_space[((k+1)*size + (j+1)) * size + (i+1)],
+                        m_space[((k+1)*size + (j+1)) * size + (i)]
+                    };
+
+                    // calculate the case index
+                    int caseIndex = 0;
+                    for (int i = 0; i < 8; ++i) {
+                        if (corners[i] != _VoxelState::CARVED) {
+                            caseIndex |= (1 << i);
+                        }
+                    }
+
+
+                    float dim = (float)m_params.voxelSpaceDim;
+                    file << i / dim << " " << j / dim << " " << k / dim << "\n";
+                }
+            }
+        }
+
+        CRV_INFO("Saved the carved point cloud into " << fileName);
+
+        file.close();
+    }
+
     void VoxelCarver::_initVoxelSpace()
     {
         uint32_t size = m_params.voxelSpaceDim * m_params.voxelSpaceDim * m_params.voxelSpaceDim;

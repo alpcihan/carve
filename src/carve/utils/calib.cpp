@@ -46,10 +46,6 @@ namespace crv
                      << intrinsics << "\nDistortion Coefficients:\n"
                      << distCoeffs);
 
-            // optimizedCameraMatrix = cv::getOptimalNewCameraMatrix(out.cameraMatrix, out.distCoeffs, cv::Size(video.width(), video.height()), 0);
-            // CRV_INFO("Optimized Camera Matrix:\n"
-            //         << out.optimizedCameraMatrix)
-
             video.reset(initialFrameIndex); // restore the frame index flag
         }
 
@@ -90,6 +86,15 @@ namespace crv
                 0);
             t = rotMatrix * t;
             tVec += t;
+
+            if (false)
+            {
+                cv::Mat debug = image.clone();
+                cv::aruco::drawDetectedMarkers(debug, corners);
+                cv::drawFrameAxes(debug, intrinsics, distCoeffs, rVec, tVec, 0.1f);
+                cv::imshow("board", debug);
+                cv::waitKey(0);
+            }
 
             return true;
         }
