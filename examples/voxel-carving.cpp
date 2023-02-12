@@ -40,7 +40,7 @@ void drawCube(float size, const cv::Mat& image, const cv::Vec3d& rVec, const cv:
 
 int main()
 {    
-    const uint32_t dim = 500;
+    const uint32_t dim = 100;
     crv::VoxelCarver* voxelCarver = new crv::VoxelCarver({.voxelSpaceDim = dim, .volumeScale = 0.9f});
     
     crv::VideoReader* calibrationVideoReader = new crv::VideoReader("resources/chessboard.mp4", 24);
@@ -75,11 +75,11 @@ int main()
         {
             for (int z = 0; z < dim-1; z++)
             {
-                ProcessVolumeCell(*voxelCarver, x, y, z, 1, &mesh);
+                ProcessVolumeCell(*voxelCarver, x, y, z, 0, &mesh);
             }
         }
     }
-    
+
     CRV_INFO("writing mesh");
     mesh.WriteMesh("mesh.off");
 

@@ -1,6 +1,7 @@
 #include "carve/voxel-carver/VoxelCarver.h"
 #include "carve/utils/segment.h"
 
+#define CARVED 0
 namespace crv
 {
     VoxelCarver::VoxelCarver(const VoxelCarverParams &voxelCarverParams)
@@ -32,7 +33,7 @@ namespace crv
                 {
                     uint32_t i1D = (k * size + j) * size + i;
 
-                    if (m_space[i1D] == _VoxelState::CARVED)
+                    if (m_space[i1D] == CARVED)
                     {
                         continue;
                     }
@@ -48,58 +49,10 @@ namespace crv
         file.close();
     }
 
-    void VoxelCarver::saveCurrentStateAsMesh(const std::string& fileName) const
-    {
-        CRV_INFO("Writing carved mesh into: " << fileName << "...");
-
-        std::ofstream file(CRV_RELATIVE(fileName));
-
-        file << "ply\nformat ascii 1.0\nelement vertex " << m_pointCount << "\nproperty float x\nproperty float y\nproperty float z\nend_header\n";
-
-        uint32_t size = m_params.voxelSpaceDim;
-
-        for (int i = 0; i < m_params.voxelSpaceDim - 1; i++)
-        {
-            for (int j = 0; j < m_params.voxelSpaceDim - 1; j++)
-            {
-                for (int k = 0; k < m_params.voxelSpaceDim - 1; k++)
-                {
-                    // get the corner values of the voxel
-                    _VoxelState corners[8] = {
-                        m_space[((k) * size + (j)) * size + (i)],
-                        m_space[((k)*size + (j)) * size + (i+1)],
-                        m_space[((k)*size + (j+1)) * size + (i+1)],
-                        m_space[((k)*size + (j+1)) * size + (i)],
-                        m_space[((k+1)*size + (j)) * size + (i)],
-                        m_space[((k+1)*size + (j)) * size + (i+1)],
-                        m_space[((k+1)*size + (j+1)) * size + (i+1)],
-                        m_space[((k+1)*size + (j+1)) * size + (i)]
-                    };
-
-                    // calculate the case index
-                    int caseIndex = 0;
-                    for (int i = 0; i < 8; ++i) {
-                        if (corners[i] != _VoxelState::CARVED) {
-                            caseIndex |= (1 << i);
-                        }
-                    }
-
-
-                    float dim = (float)m_params.voxelSpaceDim;
-                    file << i / dim << " " << j / dim << " " << k / dim << "\n";
-                }
-            }
-        }
-
-        CRV_INFO("Saved the carved point cloud into " << fileName);
-
-        file.close();
-    }
-
     void VoxelCarver::_initVoxelSpace()
     {
         uint32_t size = m_params.voxelSpaceDim * m_params.voxelSpaceDim * m_params.voxelSpaceDim;
-        m_space = std::vector<_VoxelState>(size, _VoxelState::NOT_CARVED);
+        m_space = std::vector<float>(size, -1);
         m_pointCount = size;
 
         CRV_INFO("Initialized a voxel space with the dimensions: " << m_params.voxelSpaceDim << " " << m_params.voxelSpaceDim << " " << m_params.voxelSpaceDim);
@@ -136,7 +89,7 @@ namespace crv
                     uint32_t v = a[1];
 
                     // continue if the voxel is already carved
-                    if (m_space[i1D] == _VoxelState::CARVED)
+                    if (m_space[i1D] == CARVED)
                     {
                         continue;
                     }
@@ -145,7 +98,7 @@ namespace crv
                     if (u < 0 || v < 0 || u >= binaryImage.cols || v >= binaryImage.rows)
                     {
                         m_pointCount--;
-                        m_space[i1D] = _VoxelState::CARVED;
+                        m_space[i1D] = CARVED;
                         continue;
                     }
 
@@ -153,8 +106,12 @@ namespace crv
                     if (binaryImage.at<uchar>(int(v), int(u)) == 0)
                     {
                         m_pointCount--;
-                        m_space[i1D] = _VoxelState::CARVED;
+                        m_space[i1D] = CARVED;
+                        continue;
                     }
+
+
+                    m_space[i1D] = -((a[0] - u) + (a[1] - v));
                 }
             }
         } 
