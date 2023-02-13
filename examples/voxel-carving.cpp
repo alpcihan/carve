@@ -1,8 +1,8 @@
 #include "carve/carve.h"
 
 // voxel space parameters
-const uint32_t VOXEL_SPACE_RESOLUTION = 128;
-const float VOLUME_SIZE = 0.09f;
+const uint32_t VOXEL_SPACE_RESOLUTION = 100;
+const float VOLUME_SIZE = 0.9f;
 
 // input video parameters
 const std::string CALIBRATION_VIDEO_PATH = "resources/chessboard.mp4"; // note: relative path
@@ -22,29 +22,31 @@ int main()
     crv::VideoReader* calibrationVideoReader = new crv::VideoReader(CALIBRATION_VIDEO_PATH, 24); // chessboard video
     crv::VideoReader* arucoSceneVideoReader = new crv::VideoReader(SCENE_VIDEO_PATH, 12); // target object and ArUco Board video
 
-    // estimate the camera intrinsics and distortion coefficients from the chessboard video
-    cv::Matx33d cameraMatrix;
+    cv::Mat frame, mask;
     cv::Mat distCoeffs;
-    crv::calib::estimateCamMatrixAndDistortion(*calibrationVideoReader, CHESSBOARD_DIMENSION, cameraMatrix, distCoeffs);
+    cv::Matx33d intrinsics;
+    cv::Vec3d rVec, tVec;
+    // estimate the camera intrinsics and distortion coefficients from the chessboard video
+
+    crv::calib::estimateCamMatrixAndDistortion(*calibrationVideoReader, CHESSBOARD_DIMENSION, intrinsics, distCoeffs);
 
     // read target scene video
-    cv::Mat frame, mask;
+
     while(arucoSceneVideoReader->readNextFrame(frame))
     {   
         // estimate the camera pose
-        cv::Vec3d rVec, tVec;
-        if (!crv::calib::estimateCamToArUcoBoard(frame, cameraMatrix, distCoeffs, rVec, tVec)) 
+        if (!crv::calib::estimateCamToArUcoBoard(frame, intrinsics, distCoeffs, rVec, tVec)) 
             continue;
 
         // get the binary mask
         crv::segment::evaluateObjectOnlyImage(frame, mask);
 
         // update the voxel space by using the binary mask
-        voxelCarver->carveByBinaryMask(mask, cameraMatrix, distCoeffs, rVec, tVec);
+        voxelCarver->carveByBinaryMask(mask, intrinsics, distCoeffs, rVec, tVec);
     }
     
     // save the voxel space state as point cloud (.ply)
-    voxelCarver->saveCurrentStateAsPLY(POINTCLOUD_FILE_NAME);
+    voxelCarver->saveCurrentStateAsPLY(CRV_RELATIVE(POINTCLOUD_FILE_NAME));
 
     // calculate the mesh with marching cubes
     CRV_INFO("Creating mesh with marching cubes...");
@@ -56,7 +58,7 @@ int main()
         {
             for (int z = 0; z < VOXEL_SPACE_RESOLUTION - 1; z++)
             {
-                crv::mc::processVolumeCell(*voxelCarver, x, y, z, 0, &mesh);
+                crv::mc::processVolumeCell(*voxelCarver, x, y, z, 1, &mesh);
             }
         }
     }
@@ -64,7 +66,7 @@ int main()
     // save the voxel space state as ray-marched mesh (.off)
     CRV_INFO("Mesh is created.");
     CRV_INFO("Saving the mesh...");
-    mesh.writeMesh(MESH_FILE_NAME);
+    mesh.writeMesh(CRV_RELATIVE(MESH_FILE_NAME));
 
     // free the memory
     delete calibrationVideoReader;

@@ -428,14 +428,14 @@ namespace crv::mc
 		cell.p[7] = cv::Vec3d(x + 1, y + 1, z + 1);
 
 		// cell corner values
-		cell.val[0] = (double)vol.get(x + 1, y, z);
-		cell.val[1] = (double)vol.get(x, y, z);
-		cell.val[2] = (double)vol.get(x, y + 1, z);
-		cell.val[3] = (double)vol.get(x + 1, y + 1, z);
-		cell.val[4] = (double)vol.get(x + 1, y, z + 1);
-		cell.val[5] = (double)vol.get(x, y, z + 1);
-		cell.val[6] = (double)vol.get(x, y + 1, z + 1);
-		cell.val[7] = (double)vol.get(x + 1, y + 1, z + 1);
+		cell.val[0] = vol.get(x + 1, y, z);
+		cell.val[1] = vol.get(x, y, z);
+		cell.val[2] = vol.get(x, y + 1, z);
+		cell.val[3] = vol.get(x + 1, y + 1, z);
+		cell.val[4] = vol.get(x + 1, y, z + 1);
+		cell.val[5] = vol.get(x, y, z + 1);
+		cell.val[6] = vol.get(x, y + 1, z + 1);
+		cell.val[7] = vol.get(x + 1, y + 1, z + 1);
 
 		MC_Triangle tris[6];
 		int numTris = polygonise(cell, iso, tris);
@@ -454,7 +454,7 @@ namespace crv::mc
 			vhandle[1] = mesh->AddVertex(v1);
 			vhandle[2] = mesh->AddVertex(v2);
 
-			mesh->AddFace(vhandle[0], vhandle[1], vhandle[2]);
+			mesh->AddFace(vhandle[2], vhandle[1], vhandle[0]);
 		}
 
 		return true;
