@@ -39,7 +39,7 @@ namespace crv
                     }
 
                     float dim = (float)m_params.voxelSpaceDim;
-                    file << i / dim << " " << j / dim << " " << k / dim << "\n";
+                    file << (i / dim)-0.5f << " " << (j / dim)-0.5f << " " << (k / dim)-0.5f << "\n"; // TODO: fix the precision
                 }
             }
         }

@@ -87,15 +87,6 @@ namespace crv
             t = rotMatrix * t;
             tVec += t;
 
-            if (false)
-            {
-                cv::Mat debug = image.clone();
-                cv::aruco::drawDetectedMarkers(debug, corners);
-                cv::drawFrameAxes(debug, intrinsics, distCoeffs, rVec, tVec, 0.1f);
-                cv::imshow("board", debug);
-                cv::waitKey(0);
-            }
-
             return true;
         }
     }

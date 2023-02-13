@@ -13,7 +13,7 @@ namespace crv
             cv::cvtColor(masked, masked, cv::COLOR_BGR2GRAY);
         }
 
-        static int H_L = 6, S_L = 70, V_L = 72, H_U = 20, S_U = 255, V_U = 255, ER = 3, DL = 3;
+        static int H_L = 0, S_L = 15, V_L = 60, H_U = 40, S_U = 255, V_U = 255, ER = 3, DL = 3;
 
         void Threshold_HSV(int, void* frame)
         {
@@ -63,21 +63,11 @@ namespace crv
             cv::cvtColor(blurred, hsv, cv::COLOR_BGR2HSV);
 
             // threshold by hsv
-            cv::inRange(hsv, cv::Scalar(H_L, S_L, V_L), cv::Scalar(H_U, S_U, V_U), hsvMasked);
+            cv::inRange(raw, cv::Scalar(H_L, S_L, V_L), cv::Scalar(H_U, S_U, V_U), masked);
 
             // erode and dilate
             cv::erode(hsvMasked, erode, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(ER, ER)));
-            cv::erode(erode, erode, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(ER - 1, ER - 1)));
             cv::dilate(erode, masked, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(DL, DL)));
-               
-            if (false)
-            {
-                cv::Mat debug;
-                cv::bitwise_and(raw, raw, debug, masked);
-                cv::imshow("debug", debug);
-                cv::waitKey(0);
-            }
-
         }
     }
 }

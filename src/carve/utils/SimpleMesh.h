@@ -48,7 +48,7 @@ public:
 		return m_triangles;
 	}
 
-	bool WriteMesh(const std::string& filename)
+	bool writeMesh(const std::string& filename)
 	{
 		// Write off file
 		std::ofstream outFile(filename);
