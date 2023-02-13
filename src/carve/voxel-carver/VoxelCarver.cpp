@@ -10,7 +10,7 @@ namespace crv
         _initVoxelSpace();
     }
 
-    void VoxelCarver::carveByBinaryImage(const cv::Mat& binaryImage, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, const cv::Vec3d& rVec, const cv::Vec3d& tVec)
+    void VoxelCarver::carveByBinaryMask(const cv::Mat& binaryImage, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, const cv::Vec3d& rVec, const cv::Vec3d& tVec)
     {
         _carveByBinaryImage(binaryImage, intrinsics, distCoeffs, rVec, tVec);
     }
