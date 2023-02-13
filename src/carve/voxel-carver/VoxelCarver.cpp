@@ -1,6 +1,7 @@
 #include "carve/voxel-carver/VoxelCarver.h"
 #include "carve/utils/segment.h"
 
+#define CARVED 0
 namespace crv
 {
     VoxelCarver::VoxelCarver(const VoxelCarverParams &voxelCarverParams)
@@ -32,13 +33,13 @@ namespace crv
                 {
                     uint32_t i1D = (k * size + j) * size + i;
 
-                    if (m_space[i1D] == _VoxelState::CARVED)
+                    if (m_space[i1D] == CARVED)
                     {
                         continue;
                     }
 
                     float dim = (float)m_params.voxelSpaceDim;
-                    file << i / dim << " " << j / dim << " " << k / dim << "\n";
+                    file << (i / dim)-0.5f << " " << (j / dim)-0.5f << " " << (k / dim)-0.5f << "\n"; // TODO: fix the precision
                 }
             }
         }
@@ -51,7 +52,7 @@ namespace crv
     void VoxelCarver::_initVoxelSpace()
     {
         uint32_t size = m_params.voxelSpaceDim * m_params.voxelSpaceDim * m_params.voxelSpaceDim;
-        m_space = std::vector<_VoxelState>(size, _VoxelState::NOT_CARVED);
+        m_space = std::vector<float>(size, -1);
         m_pointCount = size;
 
         CRV_INFO("Initialized a voxel space with the dimensions: " << m_params.voxelSpaceDim << " " << m_params.voxelSpaceDim << " " << m_params.voxelSpaceDim);
@@ -88,7 +89,7 @@ namespace crv
                     uint32_t v = a[1];
 
                     // continue if the voxel is already carved
-                    if (m_space[i1D] == _VoxelState::CARVED)
+                    if (m_space[i1D] == CARVED)
                     {
                         continue;
                     }
@@ -97,7 +98,7 @@ namespace crv
                     if (u < 0 || v < 0 || u >= binaryImage.cols || v >= binaryImage.rows)
                     {
                         m_pointCount--;
-                        m_space[i1D] = _VoxelState::CARVED;
+                        m_space[i1D] = CARVED;
                         continue;
                     }
 
@@ -105,8 +106,12 @@ namespace crv
                     if (binaryImage.at<uchar>(int(v), int(u)) == 0)
                     {
                         m_pointCount--;
-                        m_space[i1D] = _VoxelState::CARVED;
+                        m_space[i1D] = CARVED;
+                        continue;
                     }
+
+
+                    m_space[i1D] = -((a[0] - u) + (a[1] - v));
                 }
             }
         } 

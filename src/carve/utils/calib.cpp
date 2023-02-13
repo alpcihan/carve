@@ -46,10 +46,6 @@ namespace crv
                      << intrinsics << "\nDistortion Coefficients:\n"
                      << distCoeffs);
 
-            // optimizedCameraMatrix = cv::getOptimalNewCameraMatrix(out.cameraMatrix, out.distCoeffs, cv::Size(video.width(), video.height()), 0);
-            // CRV_INFO("Optimized Camera Matrix:\n"
-            //         << out.optimizedCameraMatrix)
-
             video.reset(initialFrameIndex); // restore the frame index flag
         }
 

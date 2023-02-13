@@ -5,7 +5,7 @@ namespace crv
     VideoReader::VideoReader(const std::string &fileName, uint32_t frameSkip)
         : m_fileName(fileName), m_frameSkip(frameSkip)
     {
-        m_videoCapture.open(CRV_RELATIVE(fileName));
+        m_videoCapture.open(CRV_RELATIVE(fileName)); // TODO: support absolute path
 
         if (!m_videoCapture.isOpened())
         {
