@@ -15,19 +15,18 @@ namespace crv
     public:
         VoxelCarver(const VoxelCarverParams &voxelCarverParams);
 
-        float get(uint32_t i) const { return m_space[i]; }
-        float get(uint32_t x, uint32_t y, uint32_t z) const { return get((z * m_params.voxelSpaceDim + y) * m_params.voxelSpaceDim + x); }
+        bool get(uint32_t i) const { return m_space[i]; }
+        bool get(uint32_t x, uint32_t y, uint32_t z) const { return get((z * m_params.voxelSpaceDim + y) * m_params.voxelSpaceDim + x); }
         
         void carveByBinaryMask(const cv::Mat& frame, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, const cv::Vec3d& rVec, const cv::Vec3d& tVec);
         void saveCurrentStateAsPLY(const std::string& fileName) const;
 
     private:
         VoxelCarverParams m_params;
-        std::vector<float> m_space;                         // TODO: replace with a more efficient solution
+        std::vector<bool> m_space;                         // TODO: replace with a more efficient solution
         uint32_t m_pointCount;
 
     private:
-        void _initVoxelSpace(); 
-        void _carveByBinaryImage(const cv::Mat& binaryImage, const cv::Matx33d& intrinsics, const cv::Mat& distCoeffs, const cv::Vec3d& rVec, const cv::Vec3d& tVec);      
+        void _initVoxelSpace();  
     };
 }

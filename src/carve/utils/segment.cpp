@@ -11,6 +11,7 @@ namespace crv
             cv::bitwise_and(image, image, masked, mask);
 
             cv::cvtColor(masked, masked, cv::COLOR_BGR2GRAY);
+            cv::threshold(masked, masked, 1, 255, 0);
         }
 
         static int H_L = 0, S_L = 15, V_L = 60, H_U = 40, S_U = 255, V_U = 255, ER = 3, DL = 3;
