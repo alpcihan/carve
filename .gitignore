@@ -12,8 +12,9 @@ build
 *.obj
 
 ## Media
+# resources
 *.[Mm][Oo][Vv]
-*.[Mm][Pp]4
+# *.[Mm][Pp]4
 *.[Jj][Pp][Gg]
 *.[Jj][Pp][Ee][Gg]
 *.[Pp][Nn][Gg]
@@ -41,7 +42,6 @@ build
 *.dll
 *.o
 *.a
-resources
 
 ## Config Files
 **/src/carve/utils/file.h
